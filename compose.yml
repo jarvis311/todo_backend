@@ -1,0 +1,61 @@
+version: '3.9'
+services:
+
+  redis:
+    image: 'redis:latest'
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - mern-stack-network
+      
+  frontend: 
+    build:
+      context: './frontend' 
+      dockerfile: Dockerfile
+    image: frontend:latest
+    ports:
+      - 3000:3000
+    container_name: frontend-container
+    # environment:
+    #   - BASE_URL=http://localhost:2020
+    networks:
+      - mern-stack-network
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: './backend'
+      dockerfile: Dockerfile
+    image: backend:latest
+    ports:
+      - 5000:5000
+    container_name: backend-container
+    networks:
+      - mern-stack-network
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    volumes:
+      - mysqlData:/data/db
+    restart: always
+    networks:
+      - mern-stack-network
+    ports:
+      - "3306:3306"
+    environment:
+      "MYSQL_DATABASE": "redis-mysql"
+      "MYSQL_ROOT_PASSWORD": "root"  
+        
+networks:
+  mern-stack-network:
+volumes:
+  mysqlData:
